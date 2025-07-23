@@ -8,7 +8,7 @@
 docker/run/agent-zero/
 
 #Ignore cursor rules
-.cursor/
+# .cursor/
 
 # ignore test files in root dir
 /*.test.py

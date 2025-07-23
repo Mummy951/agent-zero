@@ -1,0 +1,70 @@
+---
+description: Model Context Protocol (MCP) 集成开发指南
+---
+
+# MCP 集成规则
+
+## MCP 架构概述
+Agent-Zero 支持 Model Context Protocol，允许集成外部工具和服务。
+
+## MCP 相关文件
+- **API 端点**: [mcp_servers_apply.py](mdc:python/api/mcp_servers_apply.py), [mcp_servers_status.py](mdc:python/api/mcp_servers_status.py)
+- **前端组件**: `webui/components/settings/mcp/` - MCP 服务器管理界面
+- **测试服务器**: [tests/mcp/stream_http_mcp_server.py](mdc:tests/mcp/stream_http_mcp_server.py)
+
+## MCP 服务器开发
+
+### 基本结构
+MCP 服务器应该实现标准的 MCP 协议接口：
+- 工具发现和描述
+- 工具执行
+- 资源管理
+- 流式处理支持
+
+### 配置管理
+MCP 服务器配置通过 Web 界面管理：
+- 服务器连接信息
+- 认证凭据
+- 工具权限设置
+
+## MCP 客户端集成
+
+### 服务器状态监控
+实现健康检查和状态监控：
+- 连接状态检测
+- 工具可用性验证
+- 错误恢复机制
+
+### 工具代理
+MCP 工具通过代理模式集成到 Agent-Zero：
+- 动态工具发现
+- 统一工具接口
+- 参数验证和转换
+
+## 开发准则
+
+### MCP 服务器开发
+1. 遵循 MCP 协议规范
+2. 实现适当的错误处理
+3. 支持工具元数据描述
+4. 考虑并发请求处理
+5. 提供详细的日志记录
+
+### MCP 客户端开发  
+1. 实现连接池管理
+2. 处理网络异常和重连
+3. 缓存工具描述信息
+4. 监控服务器性能
+5. 提供配置验证
+
+## 测试和调试
+- 使用提供的测试服务器进行本地开发
+- 验证工具调用的输入输出格式
+- 测试异常情况和边界条件
+- 监控 MCP 服务器日志
+
+## 安全考虑
+- 验证 MCP 服务器的身份
+- 限制工具调用权限
+- 过滤敏感信息
+- 审计工具使用情况

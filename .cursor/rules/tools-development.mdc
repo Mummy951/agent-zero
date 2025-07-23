@@ -1,0 +1,42 @@
+---
+globs: python/tools/*.py
+description: AI 代理工具开发指南
+---
+
+# 工具开发规则
+
+## 工具架构
+AI 代理使用的工具位于 [python/tools/](mdc:python/tools/) 目录中。
+
+## 核心工具类型
+- **浏览器控制**: [browser_agent.py](mdc:python/tools/browser_agent.py) - 网页自动化
+- **代码执行**: [code_exe.py](mdc:python/tools/code_exe.py) - 代码运行环境
+- **文档查询**: [document_query.py](mdc:python/tools/document_query.py) - 文档搜索
+- **知识管理**: [knowledge.py](mdc:python/tools/knowledge.py) - 知识库操作
+- **记忆系统**: [memory.py](mdc:python/tools/memory.py) - 记忆存储和检索
+- **搜索引擎**: [search_engine.py](mdc:python/tools/search_engine.py) - 网络搜索
+- **Web 操作**: [web.py](mdc:python/tools/web.py) - Web 请求处理
+
+## 工具开发模式
+1. **工具类结构**: 每个工具应继承基础工具类
+2. **方法命名**: 使用描述性方法名
+3. **错误处理**: 实现适当的异常处理
+4. **参数验证**: 验证输入参数的有效性
+5. **日志记录**: 添加调试和错误日志
+
+## 工具配置
+- 工具在系统提示中定义：[prompts/default/agent.system.tools.md](mdc:prompts/default/agent.system.tools.md)
+- 工具行为配置：[prompts/default/agent.system.tool.behaviour.md](mdc:prompts/default/agent.system.tool.behaviour.md)
+
+## 浏览器工具特殊支持
+JavaScript 辅助脚本位于 [lib/browser/](mdc:lib/browser/)：
+- [click.js](mdc:lib/browser/click.js) - 点击操作
+- [extract_dom.js](mdc:lib/browser/extract_dom.js) - DOM 提取
+- [init_override.js](mdc:lib/browser/init_override.js) - 初始化重写
+
+## 开发准则
+1. 工具应该是无状态的
+2. 提供清晰的文档字符串
+3. 实现适当的超时机制
+4. 考虑并发和线程安全
+5. 遵循现有工具的接口模式

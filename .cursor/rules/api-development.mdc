@@ -1,0 +1,32 @@
+---
+globs: python/api/*.py
+description: API 端点开发指南
+---
+
+# API 开发规则
+
+## API 端点模式
+所有 API 端点都位于 [python/api/](mdc:python/api/) 目录中，每个端点一个文件。
+
+## 命名约定
+- 文件名使用下划线分隔（如 `message_async.py`）
+- 端点函数名应该与文件名匹配
+- 使用描述性名称反映功能
+
+## 常见端点类型
+- **聊天相关**: [message.py](mdc:python/api/message.py), [chat_load.py](mdc:python/api/chat_load.py), [chat_reset.py](mdc:python/api/chat_reset.py)
+- **文件管理**: [get_work_dir_files.py](mdc:python/api/get_work_dir_files.py), [download_work_dir_file.py](mdc:python/api/download_work_dir_file.py)
+- **备份操作**: [backup_create.py](mdc:python/api/backup_create.py), [backup_restore.py](mdc:python/api/backup_restore.py)
+- **MCP 服务器**: [mcp_servers_apply.py](mdc:python/api/mcp_servers_apply.py), [mcp_servers_status.py](mdc:python/api/mcp_servers_status.py)
+
+## 开发准则
+1. 每个 API 端点应该专注于单一职责
+2. 使用适当的错误处理和状态码
+3. 遵循现有的响应格式模式
+4. 添加适当的日志记录
+5. 考虑异步处理（参考 [message_async.py](mdc:python/api/message_async.py)）
+
+## 辅助函数
+使用 [python/helpers/](mdc:python/helpers/) 中的辅助函数，特别是：
+- [api.py](mdc:python/helpers/api.py) - API 通用功能
+- [files.py](mdc:python/helpers/files.py) - 文件操作辅助

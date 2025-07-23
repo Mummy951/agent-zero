@@ -1,0 +1,48 @@
+---
+globs: webui/**/*
+description: 前端 Web UI 开发指南
+---
+
+# 前端开发规则
+
+## 架构概览
+前端使用原生 HTML/CSS/JavaScript，基于组件化架构和 Alpine.js。
+
+## 核心文件
+- **入口点**: [webui/index.html](mdc:webui/index.html)
+- **主样式**: [webui/index.css](mdc:webui/index.css)
+- **主脚本**: [webui/index.js](mdc:webui/index.js)
+
+## 组件系统
+组件位于 [webui/components/](mdc:webui/components/) 目录：
+- **聊天功能**: `webui/components/chat/` - 消息处理、附件、语音
+- **设置**: `webui/components/settings/` - 配置面板、备份、MCP 服务器
+- **消息**: `webui/components/messages/` - 消息显示和调整
+
+## 状态管理
+使用 Alpine.js 存储模式：
+- [AlpineStore.js](mdc:webui/js/AlpineStore.js) - 全局状态管理
+- 组件特定存储（如 `backup-store.js`, `speech-store.js`）
+
+## API 集成
+- [api.js](mdc:webui/js/api.js) - API 调用封装
+- [components.js](mdc:webui/js/components.js) - 组件注册和管理
+
+## 样式指南
+- 使用模块化 CSS 文件（按功能分割）
+- 主题样式在 [index.css](mdc:webui/index.css) 中定义
+- 组件特定样式放在对应的 CSS 文件中
+
+## 第三方依赖
+位于 [webui/vendor/](mdc:webui/vendor/) 目录：
+- **Alpine.js**: 响应式框架
+- **ACE Editor**: 代码编辑器
+- **KaTeX**: 数学公式渲染
+- **Marked**: Markdown 解析
+
+## 开发准则
+1. 保持组件独立和可复用
+2. 使用语义化的 HTML 结构
+3. 遵循现有的命名约定
+4. 确保响应式设计
+5. 优化加载性能

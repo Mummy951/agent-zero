@@ -1,0 +1,52 @@
+---
+globs: docker/**/*
+description: Docker 容器化部署指南
+---
+
+# Docker 部署规则
+
+## 容器架构
+项目使用分层容器架构，分为基础层和运行层。
+
+## 目录结构
+- **docker/base/**: 基础容器配置
+- **docker/run/**: 运行时容器配置
+
+## 基础容器 (docker/base/)
+- **[Dockerfile](mdc:docker/base/Dockerfile)**: 基础镜像定义
+- **fs/ins/**: 安装脚本集合
+  - [install_base_packages1.sh](mdc:docker/base/fs/ins/install_base_packages1.sh) - 基础软件包
+  - [configure_ssh.sh](mdc:docker/base/fs/ins/configure_ssh.sh) - SSH 配置
+  - [after_install.sh](mdc:docker/base/fs/ins/after_install.sh) - 后续安装步骤
+
+## 运行容器 (docker/run/)
+- **[docker-compose.yml](mdc:docker/run/docker-compose.yml)**: 服务编排配置
+- **[Dockerfile](mdc:docker/run/Dockerfile)**: 运行时镜像
+- **fs/exe/**: 执行脚本
+  - [run_A0.sh](mdc:docker/run/fs/exe/run_A0.sh) - 主启动脚本
+  - [initialize.sh](mdc:docker/run/fs/exe/initialize.sh) - 初始化脚本
+
+## 服务配置
+### Nginx 配置
+- [nginx.conf](mdc:docker/run/fs/etc/nginx/nginx.conf) - Web 服务器配置
+
+### SearXNG 搜索引擎
+- [settings.yml](mdc:docker/run/fs/etc/searxng/settings.yml) - 搜索引擎设置
+- [limiter.toml](mdc:docker/run/fs/etc/searxng/limiter.toml) - 限流配置
+
+### Supervisor 进程管理
+- [supervisord.conf](mdc:docker/run/fs/etc/supervisor/conf.d/supervisord.conf) - 进程监控配置
+
+## 部署流程
+1. 构建基础镜像：`docker build -f docker/base/Dockerfile`
+2. 构建运行镜像：`docker build -f docker/run/Dockerfile`  
+3. 使用 docker-compose 启动服务
+4. 通过 [initialize.sh](mdc:docker/run/fs/exe/initialize.sh) 初始化环境
+
+## 开发准则
+1. 保持基础镜像轻量和通用
+2. 将应用特定逻辑放在运行层
+3. 使用多阶段构建优化镜像大小
+4. 确保脚本具有适当的执行权限
+5. 添加健康检查机制
+6. 使用环境变量进行配置管理

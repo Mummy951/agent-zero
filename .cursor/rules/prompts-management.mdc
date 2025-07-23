@@ -1,0 +1,57 @@
+---
+globs: prompts/**/*.md
+description: 提示和角色管理指南
+---
+
+# 提示管理规则
+
+## 提示架构
+提示系统支持多角色配置，每个角色有独立的提示集。
+
+## 角色目录结构
+- **default/**: 默认通用代理角色
+- **developer/**: 开发者专用角色
+- **researcher/**: 研究员专用角色  
+- **hacker/**: 安全专家角色
+- **agent0/**: 基础代理角色
+
+## 核心提示文件类型
+
+### 系统提示
+- **agent.system.main.role.md**: 主要角色定义
+- **agent.system.main.md**: 核心系统行为
+- **agent.system.main.communication.md**: 交流方式
+- **agent.system.main.environment.md**: 环境理解
+- **agent.system.main.solving.md**: 问题解决方法
+- **agent.system.main.tips.md**: 操作提示
+
+### 工具提示  
+- **agent.system.tools.md**: 工具总览
+- **agent.system.tool.*.md**: 特定工具说明
+- **agent.system.tool.behaviour.md**: 工具行为规范
+
+### 行为提示
+- **agent.system.behaviour*.md**: 行为模式定义
+- **behaviour.*.md**: 特定场景行为
+
+### 框架提示 (fw.*)
+- **fw.error.md**: 错误处理
+- **fw.intervention.md**: 干预机制
+- **fw.memory*.md**: 记忆相关
+- **fw.msg*.md**: 消息处理
+- **fw.tool*.md**: 工具响应
+
+## 角色定制
+参考现有角色目录创建新角色：
+1. 复制 `default/` 目录作为模板
+2. 修改 `_context.md` 定义角色上下文  
+3. 调整相关的 `*.md` 文件以符合角色特性
+4. 重点修改 `agent.system.main.role.md`
+
+## 提示开发准则
+1. 使用清晰、具体的语言
+2. 保持提示的模块化和可复用性
+3. 为不同场景提供具体示例
+4. 考虑提示长度对性能的影响
+5. 测试提示在不同模型上的效果
+6. 维护提示之间的一致性

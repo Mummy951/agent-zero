@@ -1,0 +1,66 @@
+---
+globs: python/**/*.py,webui/**/*.js,webui/**/*.css
+description: 代码风格和通用开发准则
+---
+
+# 代码风格和开发准则
+
+## Python 代码风格
+遵循项目现有的 Python 代码模式：
+
+### 导入顺序
+1. 标准库导入
+2. 第三方库导入  
+3. 本地应用导入
+
+### 命名约定
+- **类名**: PascalCase（如 `AgentMemory`）
+- **函数/方法**: snake_case（如 `get_memories`）
+- **变量**: snake_case（如 `user_input`）
+- **常量**: UPPER_SNAKE_CASE（如 `MAX_TOKENS`）
+- **私有成员**: 前缀下划线（如 `_private_method`）
+
+### 文档字符串
+为所有公共函数和类提供清晰的文档字符串：
+```python
+def process_message(self, message: str, context: dict) -> dict:
+    """处理用户消息并生成回复。
+    
+    Args:
+        message: 用户输入的消息
+        context: 上下文信息字典
+        
+    Returns:
+        包含处理结果的字典
+    """
+```
+
+## JavaScript 代码风格
+遵循现有的前端代码模式：
+
+### 命名约定
+- **变量/函数**: camelCase（如 `processMessage`）
+- **常量**: UPPER_SNAKE_CASE（如 `API_ENDPOINTS`）
+- **组件**: PascalCase（如 `ChatComponent`）
+
+### Alpine.js 模式
+- 使用 `x-data` 定义组件状态
+- 合理使用 `x-show`、`x-if` 进行条件渲染
+- 事件处理使用 `@click`、`@input` 等简洁语法
+
+## 异步编程
+- Python: 使用 `async/await` 语法
+- JavaScript: 使用 `async/await` 而非 Promise 链
+- 适当处理异步操作的错误
+
+## 错误处理
+- 使用具体的异常类型而非通用的 Exception
+- 记录详细的错误信息用于调试
+- 为用户提供友好的错误提示
+
+## 日志记录
+使用统一的日志格式：
+- 调试信息使用 DEBUG 级别
+- 一般操作使用 INFO 级别  
+- 错误使用 ERROR 级别
+- 包含相关上下文信息

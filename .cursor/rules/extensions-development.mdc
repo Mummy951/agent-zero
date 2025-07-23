@@ -1,0 +1,51 @@
+---
+globs: python/extensions/**/*.py
+description: 扩展系统开发指南
+---
+
+# 扩展系统开发指南
+
+## 扩展架构
+扩展系统允许在消息处理生命周期的不同阶段插入自定义逻辑。
+
+## 扩展钩子点
+扩展按生命周期阶段组织在 [python/extensions/](mdc:python/extensions/) 中：
+
+### 消息循环钩子
+- **message_loop_start/**: 消息循环开始时
+- **message_loop_prompts_before/**: 提示处理前
+- **message_loop_prompts_after/**: 提示处理后  
+- **message_loop_end/**: 消息循环结束时
+
+### LLM 调用钩子
+- **before_main_llm_call/**: 主要 LLM 调用前
+- **response_stream/**: 响应流处理中
+- **reasoning_stream/**: 推理流处理中
+
+### 独白钩子
+- **monologue_start/**: 独白开始时
+- **monologue_end/**: 独白结束时
+
+### 系统钩子
+- **system_prompt/**: 系统提示生成时
+
+## 扩展命名约定
+文件名以数字前缀开头控制执行顺序：
+- `_10_*.py` - 早期执行
+- `_50_*.py` - 中期执行  
+- `_90_*.py` - 后期执行
+
+## 核心扩展示例
+- **日志记录**: [_10_log_for_stream.py](mdc:python/extensions/before_main_llm_call/_10_log_for_stream.py)
+- **历史整理**: [_10_organize_history.py](mdc:python/extensions/message_loop_end/_10_organize_history.py)
+- **记忆回忆**: [_50_recall_memories.py](mdc:python/extensions/message_loop_prompts_after/_50_recall_memories.py)
+- **记忆化**: [_50_memorize_fragments.py](mdc:python/extensions/monologue_end/_50_memorize_fragments.py)
+
+## 扩展开发准则
+1. 每个扩展专注于单一功能
+2. 使用描述性的文件和函数名
+3. 考虑扩展的执行顺序
+4. 处理可能的异常情况
+5. 添加适当的日志记录
+6. 遵循异步编程模式（如适用）
+7. 确保扩展不会破坏主流程
