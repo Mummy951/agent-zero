@@ -50,7 +50,7 @@ class AgentContext:
         type: AgentContextType = AgentContextType.USER,
         last_message: datetime | None = None,
     ):
-        # build context
+        # 构建上下文
         self.id = id or str(uuid.uuid4())
         self.name = name
         self.config = config
@@ -63,7 +63,7 @@ class AgentContext:
         self.type = type
         AgentContext._counter += 1
         self.no = AgentContext._counter
-        # set to start of unix epoch
+        # 设置为 Unix 纪元开始
         self.last_message = last_message or datetime.now(timezone.utc)
 
         existing = self._contexts.get(self.id, None)
@@ -122,7 +122,7 @@ class AgentContext:
         kvps: dict | None = None,
         temp: bool | None = None,
         update_progress: Log.ProgressUpdate | None = None,
-        id: str | None = None,  # Add id parameter
+        id: str | None = None,  # 添加 id 参数
         **kwargs,
     ) -> list[Log.LogItem]:
         items: list[Log.LogItem] = []
@@ -155,12 +155,12 @@ class AgentContext:
         return self.streaming_agent or self.agent0
 
     def communicate(self, msg: "UserMessage", broadcast_level: int = 1):
-        self.paused = False  # unpause if paused
+        self.paused = False  # 如果已暂停则取消暂停
 
         current_agent = self.get_agent()
 
         if self.task and self.task.is_alive():
-            # set intervention messages to agent(s):
+            # 设置干预消息给代理：
             intervention_agent = current_agent
             while intervention_agent and broadcast_level != 0:
                 intervention_agent.intervention = msg
@@ -183,7 +183,7 @@ class AgentContext:
         self.task.start_task(func, *args, **kwargs)
         return self.task
 
-    # this wrapper ensures that superior agents are called back if the chat was loaded from file and original callstack is gone
+    # 此包装器确保如果聊天是从文件加载的并且原始调用堆栈已丢失，则上级代理会被回调。
     async def _process_chain(self, agent: "Agent", msg: "UserMessage|str", user=True):
         try:
             msg_template = (
@@ -211,7 +211,7 @@ class AgentConfig:
     mcp_servers: str
     prompts_subdir: str = ""
     memory_subdir: str = ""
-    knowledge_subdirs: list[str] = field(default_factory=lambda: ["default", "custom"])
+    knowledge_subdirs: list[str] = field(default_factory=lambda: ["默认", "自定义"])
     code_exec_docker_enabled: bool = False
     code_exec_docker_name: str = "A0-dev"
     code_exec_docker_image: str = "agent0ai/agent-zero-run:development"
@@ -251,22 +251,26 @@ class LoopData:
         self.params_temporary: dict = {}
         self.params_persistent: dict = {}
 
-        # override values with kwargs
+        # 使用 kwargs 覆盖值
         for key, value in kwargs.items():
             setattr(self, key, value)
 
 
-# intervention exception class - skips rest of message loop iteration
+# 干预异常类 - 跳过消息循环的其余迭代
 class InterventionException(Exception):
     pass
 
 
-# killer exception class - not forwarded to LLM, cannot be fixed on its own, ends message loop
+# 终止异常类 - 不转发给LLM，无法自行修复，结束消息循环
 class RepairableException(Exception):
     pass
 
 
 class HandledException(Exception):
+    """
+    一个已处理的异常类，用于终止消息循环。
+    """
+
     pass
 
 
@@ -280,40 +284,40 @@ class Agent:
         self, number: int, config: AgentConfig, context: AgentContext | None = None
     ):
 
-        # agent config
+        # 代理配置
         self.config = config
 
-        # agent context
+        # 代理上下文
         self.context = context or AgentContext(config=config, agent0=self)
 
-        # non-config vars
+        # 非配置变量
         self.number = number
         self.agent_name = f"A{self.number}"
 
         self.history = history.History(self)
         self.last_user_message: history.Message | None = None
         self.intervention: UserMessage | None = None
-        self.data = {}  # free data object all the tools can use
+        self.data = {}  # 所有工具都可以使用的自由数据对象
 
     async def monologue(self):
         while True:
             try:
-                # loop data dictionary to pass to extensions
+                # 传递给扩展的循环数据字典
                 self.loop_data = LoopData(user_message=self.last_user_message)
-                # call monologue_start extensions
+                # 调用 monologue_start 扩展
                 # monologue_start 扩展在代理的内部“独白”（monologue）阶段开始时执行，主要负责根据当前的对话历史，动态地生成和更新聊天会话的名称。
                 await self.call_extensions("monologue_start", loop_data=self.loop_data)
 
                 printer = PrintStyle(italic=True, font_color="#b3ffd9", padding=False)
 
-                # let the agent run message loop until he stops it with a response tool
+                # 让代理运行消息循环，直到它使用响应工具停止
                 while True:
 
-                    self.context.streaming_agent = self  # mark self as current streamer
+                    self.context.streaming_agent = self  # 标记自身为当前流处理器
                     self.loop_data.iteration += 1
-                    self.loop_data.params_temporary = {}  # clear temporary params
+                    self.loop_data.params_temporary = {}  # 清除临时参数
 
-                    # call message_loop_start extensions
+                    # 调用 message_loop_start 扩展
                     await self.call_extensions(
                         # message_loop_start 扩展在代理的每个消息循环开始时执行，主要功能是跟踪和管理消息循环的迭代次数。
                         "message_loop_start",
@@ -321,10 +325,10 @@ class Agent:
                     )
 
                     try:
-                        # prepare LLM chain (model, system, history)
+                        # 准备LLM链（模型、系统、历史）
                         prompt = await self.prepare_prompt(loop_data=self.loop_data)
 
-                        # call before_main_llm_call extensions
+                        # 调用 before_main_llm_call 扩展
                         # before_main_llm_call 扩展在主语言模型（LLM）调用之前执行，主要职责是初始化一个日志项，并将其引用存储在 LoopData 对象的临时参数中。
                         await self.call_extensions(
                             "before_main_llm_call", loop_data=self.loop_data
@@ -332,18 +336,18 @@ class Agent:
 
                         async def reasoning_callback(chunk: str, full: str):
                             if chunk == full:
-                                printer.print("Reasoning: ")  # start of reasoning
+                                printer.print("Reasoning: ")  # 推理开始
                             printer.stream(chunk)
                             await self.handle_reasoning_stream(full)
 
                         async def stream_callback(chunk: str, full: str):
-                            # output the agent response stream
+                            # 输出代理响应流
                             if chunk == full:
-                                printer.print("Response: ")  # start of response
+                                printer.print("Response: ")  # 响应开始
                             printer.stream(chunk)
                             await self.handle_response_stream(full)
 
-                        # call main LLM
+                        # 调用主LLM
                         agent_response, _reasoning = await self.call_chat_model(
                             messages=prompt,
                             response_callback=stream_callback,
@@ -354,10 +358,11 @@ class Agent:
 
                         if (
                             self.loop_data.last_response == agent_response
-                        ):  # if assistant_response is the same as last message in history, let him know
-                            # Append the assistant's response to the history
+                        ):  # 如果助手的响应与历史记录中的最后一条消息相同，通知它
+                            # 将助手的响应添加到历史记录
                             self.hist_add_ai_response(agent_response)
-                            # Append warning message to the history
+                            # 将警告消息添加到历史记录
+                            # fw.msg_repeat.md: 当助手的回复与历史记录中的最后一条消息相同时，用于生成警告消息，提示用户消息重复。
                             warning_msg = self.read_prompt("fw.msg_repeat.md")
                             self.hist_add_warning(message=warning_msg)
                             PrintStyle(font_color="orange", padding=True).print(
@@ -365,64 +370,65 @@ class Agent:
                             )
                             self.context.log.log(type="warning", content=warning_msg)
 
-                        else:  # otherwise proceed with tool
-                            # Append the assistant's response to the history
+                        else:  # 否则继续使用工具
+                            # 将助手的响应添加到历史记录
                             self.hist_add_ai_response(agent_response)
-                            # process tools requested in agent message
+                            # 处理代理消息中请求的工具
                             tools_result = await self.process_tools(agent_response)
-                            if tools_result:  # final response of message loop available
-                                return tools_result  # break the execution if the task is done
+                            if tools_result:  # 消息循环的最终响应可用
+                                return tools_result  # 如果任务完成，中断执行
 
-                    # exceptions inside message loop:
+                    # 消息循环内部异常:
                     except InterventionException as e:
-                        pass  # intervention message has been handled in handle_intervention(), proceed with conversation loop
+                        pass  # 干预消息已在 handle_intervention() 中处理，继续对话循环
                     except RepairableException as e:
-                        # Forward repairable errors to the LLM, maybe it can fix them
+                        # 将可修复的错误转发给LLM，也许它可以修复它们
                         error_message = errors.format_error(e)
                         self.hist_add_warning(error_message)
                         PrintStyle(font_color="red", padding=True).print(error_message)
                         self.context.log.log(type="error", content=error_message)
                     except Exception as e:
-                        # Other exception kill the loop
+                        # 其他异常终止循环
                         self.handle_critical_exception(e)
 
                     finally:
-                        # call message_loop_end extensions
+                        # 调用 message_loop_end 扩展
                         # message_loop_end 扩展在代理的消息循环结束后执行，主要负责处理聊天历史的组织和聊天会话的持久化。
                         await self.call_extensions(
                             "message_loop_end", loop_data=self.loop_data
                         )
 
-            # exceptions outside message loop:
+            # 消息循环外部异常:
             except InterventionException as e:
-                pass  # just start over
+                pass  # 重新开始
             except Exception as e:
                 self.handle_critical_exception(e)
             finally:
-                self.context.streaming_agent = None  # unset current streamer
-                # call monologue_end extensions
+                self.context.streaming_agent = None  # 取消设置当前流处理器
+                # 调用 monologue_end 扩展
                 # monologue_end 扩展在代理的内部“独白”（monologue）阶段结束时执行，主要负责将代理在此独白阶段中获得的有用信息（如关键对话片段和解决方案）持久化到记忆系统中，并设置用户界面状态以等待用户输入。
                 await self.call_extensions("monologue_end", loop_data=self.loop_data)  # type: ignore
 
     async def prepare_prompt(self, loop_data: LoopData) -> list[BaseMessage]:
         self.context.log.set_progress("Building prompt")
 
-        # call extensions before setting prompts
+        # 在设置提示之前调用扩展
         # message_loop_prompts_before 扩展在代理的消息循环中，将提示发送给主语言模型（LLM）之前执行，核心功能是确保聊天历史已被适当地压缩和管理。
         await self.call_extensions("message_loop_prompts_before", loop_data=loop_data)
 
-        # set system prompt and message history
+        # 设置系统提示和消息历史
         loop_data.system = await self.get_system_prompt(self.loop_data)
         loop_data.history_output = self.history.output()
 
-        # and allow extensions to edit them
+        # 允许扩展编辑提示
         # message_loop_prompts_after 扩展在代理的消息循环中，主语言模型（LLM）生成回复之后，但在将最终提示发送给LLM之前执行，主要负责通过集成相关记忆、解决方案、工具和当前时间信息来增强LLM的提示。
         await self.call_extensions("message_loop_prompts_after", loop_data=loop_data)
 
-        # concatenate system prompt
+        # 连接系统提示
         system_text = "\n\n".join(loop_data.system)
 
-        # join extras
+        # 合并额外信息
+        # agent.context.extras.md: 提供代理额外上下文的提示词，用于增强LLM的理解。
         extras = history.Message(
             False,
             content=self.read_prompt(
@@ -434,7 +440,7 @@ class Agent:
         ).output()
         loop_data.extras_temporary.clear()
 
-        # convert history + extras to LLM format
+        # 将历史记录 + 额外信息转换为LLM格式
         history_langchain: list[BaseMessage] = history.output_langchain(
             loop_data.history_output + extras
         )
@@ -461,15 +467,13 @@ class Agent:
         if isinstance(exception, HandledException):
             raise exception  # Re-raise the exception to kill the loop
         elif isinstance(exception, asyncio.CancelledError):
-            # Handling for asyncio.CancelledError
+            # 处理 asyncio.CancelledError
             PrintStyle(font_color="white", background_color="red", padding=True).print(
                 f"Context {self.context.id} terminated during message loop"
             )
-            raise HandledException(
-                exception
-            )  # Re-raise the exception to cancel the loop
+            raise HandledException(exception)  # 重新抛出异常以取消循环
         else:
-            # Handling for general exceptions
+            # 处理一般异常
             error_text = errors.error_text(exception)
             error_message = errors.format_error(exception)
             PrintStyle(font_color="red", padding=True).print(error_message)
@@ -479,7 +483,7 @@ class Agent:
                 content=error_message,
                 kvps={"text": error_text},
             )
-            raise HandledException(exception)  # Re-raise the exception to kill the loop
+            raise HandledException(exception)  # 重新抛出异常以终止循环
 
     async def get_system_prompt(self, loop_data: LoopData) -> list[str]:
         system_prompt = []
@@ -494,7 +498,7 @@ class Agent:
         backup_dir = []
         if (
             self.config.prompts_subdir
-        ):  # if agent has custom folder, use it and use default as backup
+        ):  # 如果代理有自定义文件夹，则使用它，并将默认文件夹作为备用
             prompt_dir = files.get_abs_path("prompts", self.config.prompts_subdir)
             backup_dir.append(files.get_abs_path("prompts/default"))
         prompt = files.parse_file(
@@ -507,7 +511,7 @@ class Agent:
         backup_dir = []
         if (
             self.config.prompts_subdir
-        ):  # if agent has custom folder, use it and use default as backup
+        ):  # 如果代理有自定义文件夹，则使用它，并将默认文件夹作为备用
             prompt_dir = files.get_abs_path("prompts", self.config.prompts_subdir)
             backup_dir.append(files.get_abs_path("prompts/default"))
         prompt = files.read_file(
@@ -529,9 +533,9 @@ class Agent:
         return self.history.add_message(ai=ai, content=content, tokens=tokens)
 
     def hist_add_user_message(self, message: UserMessage, intervention: bool = False):
-        self.history.new_topic()  # user message starts a new topic in history
+        self.history.new_topic()  # 用户消息在历史记录中开始一个新话题
 
-        # load message template based on intervention
+        # 根据干预加载消息模板
         if intervention:
             content = self.parse_prompt(
                 "fw.intervention.md",
@@ -547,11 +551,11 @@ class Agent:
                 system_message=message.system_message,
             )
 
-        # remove empty parts from template
+        # 从模板中移除空部分
         if isinstance(content, dict):
             content = {k: v for k, v in content.items() if v}
 
-        # add to history
+        # 添加到历史记录
         msg = self.hist_add_message(False, content=content)  # type: ignore
         self.last_user_message = msg
         return msg
@@ -571,9 +575,7 @@ class Agent:
         )
         return self.hist_add_message(False, content=content)
 
-    def concat_messages(
-        self, messages
-    ):  # TODO add param for message range, topic, history
+    def concat_messages(self, messages):  # TODO 添加消息范围、主题、历史记录参数
         return self.history.output_text(human_label="user", ai_label="assistant")
 
     def get_chat_model(self):
@@ -613,17 +615,17 @@ class Agent:
     ):
         model = self.get_utility_model()
 
-        # rate limiter
+        # 速率限制器
         limiter = await self.rate_limiter(
             self.config.utility_model, f"SYSTEM: {system}\nUSER: {message}", background
         )
 
-        # add output tokens to rate limiter in tokens callback
+        # 在token回调中添加输出token到速率限制器
         async def tokens_callback(delta: str, tokens: int):
             await self.handle_intervention()
             limiter.add(output=tokens)
 
-        # propagate stream to callback if set
+        # 如果设置了回调，则传播流
         async def stream_callback(chunk: str, total: str):
             if callback:
                 await callback(chunk)
@@ -645,15 +647,15 @@ class Agent:
     ):
         response = ""
 
-        # model class
+        # 模型类
         model = self.get_chat_model()
 
-        # rate limiter
+        # 速率限制器
         limiter = await self.rate_limiter(
             self.config.chat_model, ChatPromptTemplate.from_messages(messages).format()
         )
 
-        # add output tokens to rate limiter in tokens callback
+        # 在token回调中添加输出token到速率限制器
         async def tokens_callback(delta: str, tokens: int):
             await self.handle_intervention()
             limiter.add(output=tokens)
@@ -671,7 +673,7 @@ class Agent:
     async def rate_limiter(
         self, model_config: models.ModelConfig, input: str, background: bool = False
     ):
-        # rate limiter log
+        # 速率限制器日志
         wait_log = None
 
         async def wait_callback(msg: str, key: str, total: int, limit: int):
@@ -687,7 +689,7 @@ class Agent:
             if not background:
                 self.context.log.set_progress(msg, -1)
 
-        # rate limiter
+        # 速率限制器
         limiter = models.get_rate_limiter(
             model_config.provider,
             model_config.name,
@@ -702,15 +704,13 @@ class Agent:
 
     async def handle_intervention(self, progress: str = ""):
         while self.context.paused:
-            await asyncio.sleep(0.1)  # wait if paused
-        if (
-            self.intervention
-        ):  # if there is an intervention message, but not yet processed
+            await asyncio.sleep(0.1)  # 如果暂停则等待
+        if self.intervention:  # 如果有干预消息，但尚未处理
             msg = self.intervention
-            self.intervention = None  # reset the intervention message
+            self.intervention = None  # 重置干预消息
             if progress.strip():
                 self.hist_add_ai_response(progress)
-            # append the intervention message
+            # 追加干预消息
             self.hist_add_user_message(msg, intervention=True)
             raise InterventionException(msg)
 
@@ -719,23 +719,23 @@ class Agent:
             await asyncio.sleep(0.1)
 
     async def process_tools(self, msg: str):
-        # search for tool usage requests in agent message
+        # 在代理消息中搜索工具使用请求
         tool_request = extract_tools.json_parse_dirty(msg)
 
         if tool_request is not None:
-            raw_tool_name = tool_request.get("tool_name", "")  # Get the raw tool name
+            raw_tool_name = tool_request.get("tool_name", "")  # 获取原始工具名称
             tool_args = tool_request.get("tool_args", {})
 
-            tool_name = raw_tool_name  # Initialize tool_name with raw_tool_name
-            tool_method = None  # Initialize tool_method
+            tool_name = raw_tool_name  # 使用原始工具名称初始化 tool_name
+            tool_method = None  # 初始化 tool_method
 
-            # Split raw_tool_name into tool_name and tool_method if applicable
+            # 如果适用，将原始工具名称拆分为工具名称和工具方法
             if ":" in raw_tool_name:
                 tool_name, tool_method = raw_tool_name.split(":", 1)
 
-            tool = None  # Initialize tool to None
+            tool = None  # 将工具初始化为 None
 
-            # Try getting tool from MCP first
+            # 首先尝试从MCP获取工具
             try:
                 import python.helpers.mcp_handler as mcp_helper
 
@@ -753,7 +753,7 @@ class Agent:
                     background_color="black", font_color="red", padding=True
                 ).print(f"Failed to get MCP tool '{tool_name}': {e}")
 
-            # Fallback to local get_tool if MCP tool was not found or MCP lookup failed
+            # 如果MCP工具未找到或MCP查找失败，则回退到本地get_tool
             if not tool:
                 tool = self.get_tool(
                     name=tool_name,
@@ -783,6 +783,7 @@ class Agent:
                     type="error", content=f"{self.agent_name}: {error_detail}"
                 )
         else:
+            # fw.msg_misformat.md: 当代理的消息格式不正确，无法解析出有效的工具请求时，用于生成警告消息。
             warning_msg_misformat = self.read_prompt("fw.msg_misformat.md")
             self.hist_add_warning(warning_msg_misformat)
             PrintStyle(font_color="red", padding=True).print(warning_msg_misformat)
@@ -802,7 +803,7 @@ class Agent:
     async def handle_response_stream(self, stream: str):
         try:
             if len(stream) < 25:
-                return  # no reason to try
+                return  # 没有理由尝试
             response = DirtyJson.parse_string(stream)
             if isinstance(response, dict):
                 # response_stream 扩展在代理主语言模型（LLM）生成响应并以流式方式传输时执行，核心功能是实时地捕获、处理和显示LLM的输出。
@@ -845,7 +846,7 @@ class Agent:
     async def call_extensions(self, folder: str, **kwargs) -> Any:
         from python.helpers.extension import Extension
 
-        cache = {}  # some extensions can be called very often, like response_stream
+        cache = {}  # 某些扩展可能被频繁调用，例如 response_stream
 
         if folder in cache:
             classes = cache[folder]
