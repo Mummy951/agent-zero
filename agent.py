@@ -202,7 +202,6 @@ class AgentContext:
             agent.handle_critical_exception(e)
 
 
-
 @dataclass
 class AgentConfig:
     chat_model: models.ModelConfig
@@ -302,6 +301,7 @@ class Agent:
                 # loop data dictionary to pass to extensions
                 self.loop_data = LoopData(user_message=self.last_user_message)
                 # call monologue_start extensions
+                # monologue_start 扩展在代理的内部“独白”（monologue）阶段开始时执行，主要负责根据当前的对话历史，动态地生成和更新聊天会话的名称。
                 await self.call_extensions("monologue_start", loop_data=self.loop_data)
 
                 printer = PrintStyle(italic=True, font_color="#b3ffd9", padding=False)
@@ -315,7 +315,9 @@ class Agent:
 
                     # call message_loop_start extensions
                     await self.call_extensions(
-                        "message_loop_start", loop_data=self.loop_data
+                        # message_loop_start 扩展在代理的每个消息循环开始时执行，主要功能是跟踪和管理消息循环的迭代次数。
+                        "message_loop_start",
+                        loop_data=self.loop_data,
                     )
 
                     try:
@@ -323,7 +325,10 @@ class Agent:
                         prompt = await self.prepare_prompt(loop_data=self.loop_data)
 
                         # call before_main_llm_call extensions
-                        await self.call_extensions("before_main_llm_call", loop_data=self.loop_data)
+                        # before_main_llm_call 扩展在主语言模型（LLM）调用之前执行，主要职责是初始化一个日志项，并将其引用存储在 LoopData 对象的临时参数中。
+                        await self.call_extensions(
+                            "before_main_llm_call", loop_data=self.loop_data
+                        )
 
                         async def reasoning_callback(chunk: str, full: str):
                             if chunk == full:
@@ -383,6 +388,7 @@ class Agent:
 
                     finally:
                         # call message_loop_end extensions
+                        # message_loop_end 扩展在代理的消息循环结束后执行，主要负责处理聊天历史的组织和聊天会话的持久化。
                         await self.call_extensions(
                             "message_loop_end", loop_data=self.loop_data
                         )
@@ -395,12 +401,14 @@ class Agent:
             finally:
                 self.context.streaming_agent = None  # unset current streamer
                 # call monologue_end extensions
+                # monologue_end 扩展在代理的内部“独白”（monologue）阶段结束时执行，主要负责将代理在此独白阶段中获得的有用信息（如关键对话片段和解决方案）持久化到记忆系统中，并设置用户界面状态以等待用户输入。
                 await self.call_extensions("monologue_end", loop_data=self.loop_data)  # type: ignore
 
     async def prepare_prompt(self, loop_data: LoopData) -> list[BaseMessage]:
         self.context.log.set_progress("Building prompt")
 
         # call extensions before setting prompts
+        # message_loop_prompts_before 扩展在代理的消息循环中，将提示发送给主语言模型（LLM）之前执行，核心功能是确保聊天历史已被适当地压缩和管理。
         await self.call_extensions("message_loop_prompts_before", loop_data=loop_data)
 
         # set system prompt and message history
@@ -408,6 +416,7 @@ class Agent:
         loop_data.history_output = self.history.output()
 
         # and allow extensions to edit them
+        # message_loop_prompts_after 扩展在代理的消息循环中，主语言模型（LLM）生成回复之后，但在将最终提示发送给LLM之前执行，主要负责通过集成相关记忆、解决方案、工具和当前时间信息来增强LLM的提示。
         await self.call_extensions("message_loop_prompts_after", loop_data=loop_data)
 
         # concatenate system prompt
@@ -474,6 +483,7 @@ class Agent:
 
     async def get_system_prompt(self, loop_data: LoopData) -> list[str]:
         system_prompt = []
+        # system_prompt 扩展负责在代理与主语言模型（LLM）交互时，动态地构建和配置传递给LLM的“系统提示”。
         await self.call_extensions(
             "system_prompt", system_prompt=system_prompt, loop_data=loop_data
         )
@@ -746,7 +756,11 @@ class Agent:
             # Fallback to local get_tool if MCP tool was not found or MCP lookup failed
             if not tool:
                 tool = self.get_tool(
-                    name=tool_name, method=tool_method, args=tool_args, message=msg, loop_data=self.loop_data
+                    name=tool_name,
+                    method=tool_method,
+                    args=tool_args,
+                    message=msg,
+                    loop_data=self.loop_data,
                 )
 
             if tool:
@@ -778,6 +792,7 @@ class Agent:
             )
 
     async def handle_reasoning_stream(self, stream: str):
+        # reasoning_stream 扩展在代理进行内部“推理”（reasoning）过程并流式输出其思考时执行，主要功能是实时捕获并更新这些推理流。
         await self.call_extensions(
             "reasoning_stream",
             loop_data=self.loop_data,
@@ -790,6 +805,7 @@ class Agent:
                 return  # no reason to try
             response = DirtyJson.parse_string(stream)
             if isinstance(response, dict):
+                # response_stream 扩展在代理主语言模型（LLM）生成响应并以流式方式传输时执行，核心功能是实时地捕获、处理和显示LLM的输出。
                 await self.call_extensions(
                     "response_stream",
                     loop_data=self.loop_data,
@@ -801,7 +817,13 @@ class Agent:
             pass
 
     def get_tool(
-        self, name: str, method: str | None, args: dict, message: str, loop_data: LoopData | None, **kwargs
+        self,
+        name: str,
+        method: str | None,
+        args: dict,
+        message: str,
+        loop_data: LoopData | None,
+        **kwargs,
     ):
         from python.tools.unknown import Unknown
         from python.helpers.tool import Tool
@@ -811,7 +833,13 @@ class Agent:
         )
         tool_class = classes[0] if classes else Unknown
         return tool_class(
-            agent=self, name=name, method=method, args=args, message=message, loop_data=loop_data, **kwargs
+            agent=self,
+            name=name,
+            method=method,
+            args=args,
+            message=message,
+            loop_data=loop_data,
+            **kwargs,
         )
 
     async def call_extensions(self, folder: str, **kwargs) -> Any:
