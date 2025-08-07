@@ -104,10 +104,10 @@ Agent Zero 的运作机制是基于大型语言模型（LLM）的。LLM 在接�
 flowchart TD
     A[Agent Zero] --> B{决策循环}
     B --> C[使用工具]
-    C --> D1(memory_save)
-    C --> D2(memory_load)
-    C --> D3(memory_delete)
-    C --> D4(memory_forget)
+    C --> D1[memory_save]
+    C --> D2[memory_load]
+    C --> D3[memory_delete]
+    C --> D4[memory_forget]
 
     D1 --> E[Memory.insert_text]
     D2 --> F[Memory.search_similarity_threshold]
@@ -119,7 +119,7 @@ flowchart TD
     G --> I
     H --> I
 
-    subgraph Memory["Memory 核心模块 (python/helpers/memory.py)"]
+    subgraph Memory["Memory 核心模块 python/helpers/memory.py"]
         I --- J[Memory 类]
         J -->|管理| K[CacheBackedEmbeddings]
         J -->|管理| L[Memory.Area<br/>MAIN, FRAGMENTS,<br/>SOLUTIONS, INSTRUMENTS]
@@ -129,11 +129,11 @@ flowchart TD
 
     subgraph Auto["自动记忆和召回"]
         B --> O[Monologue End Extension]
-        O --> P(自动保存对话片段)
+        O --> P[自动保存对话片段]
         P --> E
 
         B --> Q[Message Loop Prompts After Extension]
-        Q --> R(自动召回相关记忆)
+        Q --> R[自动召回相关记忆]
         R --> F
     end
 
@@ -144,4 +144,14 @@ flowchart TD
     subgraph Tools["其他工具集成"]
         T[python/tools/knowledge_tool.py] -->|可能调用| F
     end
+
+    style A fill:#e3f2fd
+    style B fill:#fff3e0
+    style C fill:#f1f8e9
+    style D1 fill:#fce4ec
+    style D2 fill:#fce4ec
+    style D3 fill:#fce4ec
+    style D4 fill:#fce4ec
+    style I fill:#e8f5e8
+    style J fill:#fff9c4
 ```

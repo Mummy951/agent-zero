@@ -94,7 +94,15 @@ class SettingsField(TypedDict, total=False):
     title: str
     description: str
     type: Literal[
-        "text", "number", "select", "range", "textarea", "password", "switch", "button", "html"
+        "text",
+        "number",
+        "select",
+        "range",
+        "textarea",
+        "password",
+        "switch",
+        "button",
+        "html",
     ]
     value: Any
     min: float
@@ -124,6 +132,7 @@ _settings: Settings | None = None
 
 def convert_out(settings: Settings) -> SettingsOutput:
     from models import ModelProvider
+
     default_settings = get_default_settings()
 
     # main model section
@@ -132,7 +141,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_provider",
             "title": "Chat model provider",
-            "description": "Select provider for main chat model used by Agent Zero",
+            "description": "选择Agent Zero主要聊天模型的提供商",
             "type": "select",
             "value": settings["chat_model_provider"],
             "options": [{"value": p.name, "label": p.value} for p in ModelProvider],
@@ -142,7 +151,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_name",
             "title": "Chat model name",
-            "description": "Exact name of model from selected provider",
+            "description": "所选提供商的精确模型名称",
             "type": "text",
             "value": settings["chat_model_name"],
         }
@@ -152,7 +161,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_api_base",
             "title": "Chat model API base URL",
-            "description": "API base URL for main chat model. Leave empty for default. Only relevant for Azure, local and custom (other) providers.",
+            "description": "主聊天模型的API基础URL。留空表示使用默认值。仅适用于Azure、本地和自定义（其他）提供商。",
             "type": "text",
             "value": settings["chat_model_api_base"],
         }
@@ -162,7 +171,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_ctx_length",
             "title": "Chat model context length",
-            "description": "Maximum number of tokens in the context window for LLM. System prompt, chat history, RAG and response all count towards this limit.",
+            "description": "LLM上下文窗口中的最大token数量。系统提示、聊天历史、RAG和响应都计入此限制。",
             "type": "number",
             "value": settings["chat_model_ctx_length"],
         }
@@ -172,7 +181,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_ctx_history",
             "title": "Context window space for chat history",
-            "description": "Portion of context window dedicated to chat history visible to the agent. Chat history will automatically be optimized to fit. Smaller size will result in shorter and more summarized history. The remaining space will be used for system prompt, RAG and response.",
+            "description": "上下文窗口中专用于代理可见聊天历史的部分。聊天历史将自动优化以适应。较小的尺寸将导致更短和更简洁的历史记录。剩余空间将用于系统提示、RAG和响应。",
             "type": "range",
             "min": 0.01,
             "max": 1,
@@ -185,7 +194,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_vision",
             "title": "Supports Vision",
-            "description": "Models capable of Vision can for example natively see the content of image attachments.",
+            "description": "具有视觉能力的模型，例如可以本地查看图像附件的内容。",
             "type": "switch",
             "value": settings["chat_model_vision"],
         }
@@ -195,7 +204,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_rl_requests",
             "title": "Requests per minute limit",
-            "description": "Limits the number of requests per minute to the chat model. Waits if the limit is exceeded. Set to 0 to disable rate limiting.",
+            "description": "限制每分钟向聊天模型发出的请求数量。如果超出限制则等待。设置为0表示禁用速率限制。",
             "type": "number",
             "value": settings["chat_model_rl_requests"],
         }
@@ -205,7 +214,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_rl_input",
             "title": "Input tokens per minute limit",
-            "description": "Limits the number of input tokens per minute to the chat model. Waits if the limit is exceeded. Set to 0 to disable rate limiting.",
+            "description": "限制每分钟向聊天模型输入的token数量。如果超出限制则等待。设置为0表示禁用速率限制。",
             "type": "number",
             "value": settings["chat_model_rl_input"],
         }
@@ -215,7 +224,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_rl_output",
             "title": "Output tokens per minute limit",
-            "description": "Limits the number of output tokens per minute to the chat model. Waits if the limit is exceeded. Set to 0 to disable rate limiting.",
+            "description": "限制每分钟向聊天模型输出的token数量。如果超出限制则等待。设置为0表示禁用速率限制。",
             "type": "number",
             "value": settings["chat_model_rl_output"],
         }
@@ -225,7 +234,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "chat_model_kwargs",
             "title": "Chat model additional parameters",
-            "description": "Any other parameters supported by <a href='https://docs.litellm.ai/docs/set_keys' target='_blank'>LiteLLM</a>. Format is KEY=VALUE on individual lines, just like .env file.",
+            "description": "LiteLLM支持的任何其他参数。<a href='https://docs.litellm.ai/docs/set_keys' target='_blank'>LiteLLM</a>。格式为每行KEY=VALUE，就像.env文件一样。",
             "type": "textarea",
             "value": _dict_to_env(settings["chat_model_kwargs"]),
         }
@@ -234,7 +243,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     chat_model_section: SettingsSection = {
         "id": "chat_model",
         "title": "Chat Model",
-        "description": "Selection and settings for main chat model used by Agent Zero",
+        "description": "Agent Zero主要聊天模型的选择和设置",
         "fields": chat_model_fields,
         "tab": "agent",
     }
@@ -245,7 +254,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "util_model_provider",
             "title": "Utility model provider",
-            "description": "Select provider for utility model used by the framework",
+            "description": "选择框架使用的实用模型的提供商",
             "type": "select",
             "value": settings["util_model_provider"],
             "options": [{"value": p.name, "label": p.value} for p in ModelProvider],
@@ -255,7 +264,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "util_model_name",
             "title": "Utility model name",
-            "description": "Exact name of model from selected provider",
+            "description": "所选提供商的精确模型名称",
             "type": "text",
             "value": settings["util_model_name"],
         }
@@ -265,7 +274,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "util_model_api_base",
             "title": "Utility model API base URL",
-            "description": "API base URL for utility model. Leave empty for default. Only relevant for Azure, local and custom (other) providers.",
+            "description": "实用模型的API基础URL。留空表示使用默认值。仅适用于Azure、本地和自定义（其他）提供商。",
             "type": "text",
             "value": settings["util_model_api_base"],
         }
@@ -275,7 +284,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "util_model_rl_requests",
             "title": "Requests per minute limit",
-            "description": "Limits the number of requests per minute to the utility model. Waits if the limit is exceeded. Set to 0 to disable rate limiting.",
+            "description": "限制每分钟向实用模型发出的请求数量。如果超出限制则等待。设置为0表示禁用速率限制。",
             "type": "number",
             "value": settings["util_model_rl_requests"],
         }
@@ -285,7 +294,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "util_model_rl_input",
             "title": "Input tokens per minute limit",
-            "description": "Limits the number of input tokens per minute to the utility model. Waits if the limit is exceeded. Set to 0 to disable rate limiting.",
+            "description": "限制每分钟向实用模型输入的token数量。如果超出限制则等待。设置为0表示禁用速率限制。",
             "type": "number",
             "value": settings["util_model_rl_input"],
         }
@@ -295,7 +304,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "util_model_rl_output",
             "title": "Output tokens per minute limit",
-            "description": "Limits the number of output tokens per minute to the utility model. Waits if the limit is exceeded. Set to 0 to disable rate limiting.",
+            "description": "限制每分钟向实用模型输出的token数量。如果超出限制则等待。设置为0表示禁用速率限制。",
             "type": "number",
             "value": settings["util_model_rl_output"],
         }
@@ -305,7 +314,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "util_model_kwargs",
             "title": "Utility model additional parameters",
-            "description": "Any other parameters supported by <a href='https://docs.litellm.ai/docs/set_keys' target='_blank'>LiteLLM</a>. Format is KEY=VALUE on individual lines, just like .env file.",
+            "description": "LiteLLM支持的任何其他参数。<a href='https://docs.litellm.ai/docs/set_keys' target='_blank'>LiteLLM</a>。格式为每行KEY=VALUE，就像.env文件一样。",
             "type": "textarea",
             "value": _dict_to_env(settings["util_model_kwargs"]),
         }
@@ -314,7 +323,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     util_model_section: SettingsSection = {
         "id": "util_model",
         "title": "Utility model",
-        "description": "Smaller, cheaper, faster model for handling utility tasks like organizing memory, preparing prompts, summarizing.",
+        "description": "用于处理内存组织、提示准备、总结等实用任务的更小、更便宜、更快速的模型。",
         "fields": util_model_fields,
         "tab": "agent",
     }
@@ -325,7 +334,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "embed_model_provider",
             "title": "Embedding model provider",
-            "description": "Select provider for embedding model used by the framework",
+            "description": "选择框架使用的嵌入模型的提供商",
             "type": "select",
             "value": settings["embed_model_provider"],
             "options": [{"value": p.name, "label": p.value} for p in ModelProvider],
@@ -335,7 +344,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "embed_model_name",
             "title": "Embedding model name",
-            "description": "Exact name of model from selected provider",
+            "description": "所选提供商的精确模型名称",
             "type": "text",
             "value": settings["embed_model_name"],
         }
@@ -345,7 +354,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "embed_model_api_base",
             "title": "Embedding model API base URL",
-            "description": "API base URL for embedding model. Leave empty for default. Only relevant for Azure, local and custom (other) providers.",
+            "description": "嵌入模型的API基础URL。留空表示使用默认值。仅适用于Azure、本地和自定义（其他）提供商。",
             "type": "text",
             "value": settings["embed_model_api_base"],
         }
@@ -355,7 +364,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "embed_model_rl_requests",
             "title": "Requests per minute limit",
-            "description": "Limits the number of requests per minute to the embedding model. Waits if the limit is exceeded. Set to 0 to disable rate limiting.",
+            "description": "限制每分钟向嵌入模型发出的请求数量。如果超出限制则等待。设置为0表示禁用速率限制。",
             "type": "number",
             "value": settings["embed_model_rl_requests"],
         }
@@ -365,7 +374,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "embed_model_rl_input",
             "title": "Input tokens per minute limit",
-            "description": "Limits the number of input tokens per minute to the embedding model. Waits if the limit is exceeded. Set to 0 to disable rate limiting.",
+            "description": "限制每分钟向嵌入模型输入的token数量。如果超出限制则等待。设置为0表示禁用速率限制。",
             "type": "number",
             "value": settings["embed_model_rl_input"],
         }
@@ -375,7 +384,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "embed_model_kwargs",
             "title": "Embedding model additional parameters",
-            "description": "Any other parameters supported by <a href='https://docs.litellm.ai/docs/set_keys' target='_blank'>LiteLLM</a>. Format is KEY=VALUE on individual lines, just like .env file.",
+            "description": "LiteLLM支持的任何其他参数。<a href='https://docs.litellm.ai/docs/set_keys' target='_blank'>LiteLLM</a>。格式为每行KEY=VALUE，就像.env文件一样。",
             "type": "textarea",
             "value": _dict_to_env(settings["embed_model_kwargs"]),
         }
@@ -384,7 +393,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     embed_model_section: SettingsSection = {
         "id": "embed_model",
         "title": "Embedding Model",
-        "description": f"Settings for the embedding model used by Agent Zero.<br><h4>⚠️ No need to change</h4>The default HuggingFace model {default_settings['embed_model_name']} is preloaded and runs locally within the docker container and there's no need to change it unless you have a specific requirements for embedding.",
+        "description": f"Agent Zero使用的嵌入模型的设置。<br><h4>⚠️ 无需更改</h4>默认的HuggingFace模型{default_settings['embed_model_name']}已预加载并在Docker容器内本地运行，除非您对嵌入有特殊要求，否则无需更改。",
         "fields": embed_model_fields,
         "tab": "agent",
     }
@@ -395,7 +404,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "browser_model_provider",
             "title": "Web Browser model provider",
-            "description": "Select provider for web browser model used by <a href='https://github.com/browser-use/browser-use' target='_blank'>browser-use</a> framework",
+            "description": "选择<a href='https://github.com/browser-use/browser-use' target='_blank'>browser-use</a>框架使用的网页浏览器模型的提供商",
             "type": "select",
             "value": settings["browser_model_provider"],
             "options": [{"value": p.name, "label": p.value} for p in ModelProvider],
@@ -405,7 +414,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "browser_model_name",
             "title": "Web Browser model name",
-            "description": "Exact name of model from selected provider",
+            "description": "所选提供商的精确模型名称",
             "type": "text",
             "value": settings["browser_model_name"],
         }
@@ -415,7 +424,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "browser_model_api_base",
             "title": "Web Browser model API base URL",
-            "description": "API base URL for web browser model. Leave empty for default. Only relevant for Azure, local and custom (other) providers.",
+            "description": "网页浏览器模型的API基础URL。留空表示使用默认值。仅适用于Azure、本地和自定义（其他）提供商。",
             "type": "text",
             "value": settings["browser_model_api_base"],
         }
@@ -425,7 +434,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "browser_model_vision",
             "title": "Use Vision",
-            "description": "Models capable of Vision can use it to analyze web pages from screenshots. Increases quality but also token usage.",
+            "description": "具有视觉能力的模型可以利用它分析网页截图。这会提高质量，但也会增加token使用量。",
             "type": "switch",
             "value": settings["browser_model_vision"],
         }
@@ -435,7 +444,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "browser_model_kwargs",
             "title": "Web Browser model additional parameters",
-            "description": "Any other parameters supported by <a href='https://docs.litellm.ai/docs/set_keys' target='_blank'>LiteLLM</a>. Format is KEY=VALUE on individual lines, just like .env file.",
+            "description": "LiteLLM支持的任何其他参数。<a href='https://docs.litellm.ai/docs/set_keys' target='_blank'>LiteLLM</a>。格式为每行KEY=VALUE，就像.env文件一样。",
             "type": "textarea",
             "value": _dict_to_env(settings["browser_model_kwargs"]),
         }
@@ -444,11 +453,10 @@ def convert_out(settings: Settings) -> SettingsOutput:
     browser_model_section: SettingsSection = {
         "id": "browser_model",
         "title": "Web Browser Model",
-        "description": "Settings for the web browser model. Agent Zero uses <a href='https://github.com/browser-use/browser-use' target='_blank'>browser-use</a> agentic framework to handle web interactions.",
+        "description": "Web浏览器模型的设置。Agent Zero使用<a href='https://github.com/browser-use/browser-use' target='_blank'>browser-use</a>代理框架来处理Web交互。",
         "fields": browser_model_fields,
         "tab": "agent",
     }
-
 
     # basic auth section
     auth_fields: list[SettingsField] = []
@@ -457,7 +465,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "auth_login",
             "title": "UI Login",
-            "description": "Set user name for web UI",
+            "description": "设置Web UI的用户名",
             "type": "text",
             "value": dotenv.get_dotenv_value(dotenv.KEY_AUTH_LOGIN) or "",
         }
@@ -467,7 +475,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "auth_password",
             "title": "UI Password",
-            "description": "Set user password for web UI",
+            "description": "设置Web UI的用户密码",
             "type": "password",
             "value": (
                 PASSWORD_PLACEHOLDER
@@ -482,7 +490,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
             {
                 "id": "root_password",
                 "title": "root Password",
-                "description": "Change linux root password in docker container. This password can be used for SSH access. Original password was randomly generated during setup.",
+                "description": "更改Docker容器中的Linux root密码。此密码可用于SSH访问。原始密码是在安装过程中随机生成的。",
                 "type": "password",
                 "value": "",
             }
@@ -491,7 +499,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     auth_section: SettingsSection = {
         "id": "auth",
         "title": "Authentication",
-        "description": "Settings for authentication to use Agent Zero Web UI.",
+        "description": "使用Agent Zero Web UI的身份验证设置。",
         "fields": auth_fields,
         "tab": "external",
     }
@@ -500,12 +508,14 @@ def convert_out(settings: Settings) -> SettingsOutput:
     api_keys_fields: list[SettingsField] = []
 
     for provider in ModelProvider:
-        api_keys_fields.append(_get_api_key_field(settings, provider.name.lower(), provider.value))
+        api_keys_fields.append(
+            _get_api_key_field(settings, provider.name.lower(), provider.value)
+        )
 
     api_keys_section: SettingsSection = {
         "id": "api_keys",
         "title": "API Keys",
-        "description": "API keys for model providers and services used by Agent Zero.",
+        "description": "Agent Zero使用的模型提供商和服务的API密钥。",
         "fields": api_keys_fields,
         "tab": "external",
     }
@@ -517,7 +527,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "agent_prompts_subdir",
             "title": "A0 Prompts Subdirectory",
-            "description": "Subdirectory of /prompts folder to be used by default agent no. 0. Subordinate agents can be spawned with other subdirectories, that is on their superior agent to decide. This setting affects the behaviour of the top level agent you communicate with.",
+            "description": "用于默认代理0的/prompts文件夹的子目录。下级代理可以使用其他子目录生成，这由它们的上级代理决定。此设置影响您与之通信的顶级代理的行为。",
             "type": "select",
             "value": settings["agent_prompts_subdir"],
             "options": [
@@ -531,7 +541,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "agent_memory_subdir",
             "title": "Memory Subdirectory",
-            "description": "Subdirectory of /memory folder to use for agent memory storage. Used to separate memory storage between different instances.",
+            "description": "用于代理内存存储的/memory文件夹的子目录。用于分隔不同实例之间的内存存储。",
             "type": "text",
             "value": settings["agent_memory_subdir"],
             # "options": [
@@ -545,7 +555,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "agent_knowledge_subdir",
             "title": "Knowledge subdirectory",
-            "description": "Subdirectory of /knowledge folder to use for agent knowledge import. 'default' subfolder is always imported and contains framework knowledge.",
+            "description": "用于代理知识导入的/knowledge文件夹的子目录。'default'子文件夹始终导入并包含框架知识。",
             "type": "select",
             "value": settings["agent_knowledge_subdir"],
             "options": [
@@ -558,7 +568,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     agent_section: SettingsSection = {
         "id": "agent",
         "title": "Agent Config",
-        "description": "Agent parameters.",
+        "description": "代理参数。",
         "fields": agent_fields,
         "tab": "agent",
     }
@@ -580,7 +590,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
             {
                 "id": "rfc_url",
                 "title": "RFC Destination URL",
-                "description": "URL of dockerized A0 instance for remote function calls. Do not specify port here.",
+                "description": "用于远程函数调用的Docker化A0实例的URL。此处不指定端口。",
                 "type": "text",
                 "value": settings["rfc_url"],
             }
@@ -590,7 +600,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "rfc_password",
             "title": "RFC Password",
-            "description": "Password for remote function calls. Passwords must match on both instances. RFCs can not be used with empty password.",
+            "description": "远程函数调用的密码。两个实例上的密码必须匹配。RFC不能使用空密码。",
             "type": "password",
             "value": (
                 PASSWORD_PLACEHOLDER
@@ -605,7 +615,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
             {
                 "id": "rfc_port_http",
                 "title": "RFC HTTP port",
-                "description": "HTTP port for dockerized instance of A0.",
+                "description": "Docker化A0实例的HTTP端口。",
                 "type": "text",
                 "value": settings["rfc_port_http"],
             }
@@ -615,7 +625,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
             {
                 "id": "rfc_port_ssh",
                 "title": "RFC SSH port",
-                "description": "SSH port for dockerized instance of A0.",
+                "description": "Docker化A0实例的SSH端口。",
                 "type": "text",
                 "value": settings["rfc_port_ssh"],
             }
@@ -624,7 +634,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     dev_section: SettingsSection = {
         "id": "dev",
         "title": "Development",
-        "description": "Parameters for A0 framework development. RFCs (remote function calls) are used to call functions on another A0 instance. You can develop and debug A0 natively on your local system while redirecting some functions to A0 instance in docker. This is crucial for development as A0 needs to run in standardized environment to support all features.",
+        "description": "A0框架开发的参数。RFC（远程函数调用）用于调用另一个A0实例上的函数。您可以在本地系统上原生开发和调试A0，同时将某些函数重定向到docker中的A0实例。这对于开发至关重要，因为A0需要在标准化环境中运行以支持所有功能。",
         "fields": dev_fields,
         "tab": "developer",
     }
@@ -636,7 +646,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "stt_microphone_section",
             "title": "Microphone device",
-            "description": "Select the microphone device to use for speech-to-text.",
+            "description": "选择用于语音转文本的麦克风设备。",
             "value": "<x-component path='/settings/speech/microphone.html' />",
             "type": "html",
         }
@@ -646,7 +656,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "stt_model_size",
             "title": "Speech-to-text model size",
-            "description": "Select the speech-to-text model size",
+            "description": "选择语音转文本模型的大小",
             "type": "select",
             "value": settings["stt_model_size"],
             "options": [
@@ -664,7 +674,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "stt_language",
             "title": "Speech-to-text language code",
-            "description": "Language code (e.g. en, fr, it)",
+            "description": "语言代码（例如en，fr，it）",
             "type": "text",
             "value": settings["stt_language"],
         }
@@ -674,7 +684,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "stt_silence_threshold",
             "title": "Microphone silence threshold",
-            "description": "Silence detection threshold. Lower values are more sensitive to noise.",
+            "description": "静音检测阈值。值越低对噪声越敏感。",
             "type": "range",
             "min": 0,
             "max": 1,
@@ -687,7 +697,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "stt_silence_duration",
             "title": "Microphone silence duration (ms)",
-            "description": "Duration of silence before the system considers speaking to have ended.",
+            "description": "系统判定说话结束前的静音持续时间。",
             "type": "text",
             "value": settings["stt_silence_duration"],
         }
@@ -697,7 +707,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "stt_waiting_timeout",
             "title": "Microphone waiting timeout (ms)",
-            "description": "Duration of silence before the system closes the microphone.",
+            "description": "系统关闭麦克风前的静音持续时间。",
             "type": "text",
             "value": settings["stt_waiting_timeout"],
         }
@@ -705,12 +715,12 @@ def convert_out(settings: Settings) -> SettingsOutput:
 
     # TTS fields
     tts_fields: list[SettingsField] = []
-    
+
     tts_fields.append(
         {
             "id": "tts_kokoro",
             "title": "Enable Kokoro TTS",
-            "description": "Enable higher quality server-side AI (Kokoro) instead of browser-based text-to-speech.",
+            "description": "启用更高质量的服务器端AI（Kokoro）而不是基于浏览器的文本转语音。",
             "type": "switch",
             "value": settings["tts_kokoro"],
         }
@@ -719,7 +729,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     speech_section: SettingsSection = {
         "id": "speech",
         "title": "Speech",
-        "description": "Voice transcription and speech synthesis settings.",
+        "description": "语音转录和语音合成设置。",
         "fields": stt_fields + tts_fields,
         "tab": "agent",
     }
@@ -731,7 +741,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "mcp_servers_config",
             "title": "MCP Servers Configuration",
-            "description": "External MCP servers can be configured here.",
+            "description": "外部MCP服务器可在此处配置。",
             "type": "button",
             "value": "Open",
         }
@@ -741,7 +751,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "mcp_servers",
             "title": "MCP Servers",
-            "description": "(JSON list of) >> RemoteServer <<: [name, url, headers, timeout (opt), sse_read_timeout (opt), disabled (opt)] / >> Local Server <<: [name, command, args, env, encoding (opt), encoding_error_handler (opt), disabled (opt)]",
+            "description": "（JSON列表）>> 远程服务器 <<：[名称，URL，请求头，超时（可选），sse_读取超时（可选），禁用（可选）] / >> 本地服务器 <<：[名称，命令，参数，环境变量，编码（可选），编码错误处理器（可选），禁用（可选）]",
             "type": "textarea",
             "value": settings["mcp_servers"],
             "hidden": True,
@@ -752,7 +762,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "mcp_client_init_timeout",
             "title": "MCP Client Init Timeout",
-            "description": "Timeout for MCP client initialization (in seconds). Higher values might be required for complex MCPs, but might also slowdown system startup.",
+            "description": "MCP客户端初始化超时（秒）。对于复杂的MCP，可能需要更高的值，但也可能减慢系统启动速度。",
             "type": "number",
             "value": settings["mcp_client_init_timeout"],
         }
@@ -762,7 +772,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "mcp_client_tool_timeout",
             "title": "MCP Client Tool Timeout",
-            "description": "Timeout for MCP client tool execution. Higher values might be required for complex tools, but might also result in long responses with failing tools.",
+            "description": "MCP客户端工具执行超时。对于复杂的工具，可能需要更高的值，但也可能导致工具失败并产生长时间响应。",
             "type": "number",
             "value": settings["mcp_client_tool_timeout"],
         }
@@ -771,7 +781,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     mcp_client_section: SettingsSection = {
         "id": "mcp_client",
         "title": "External MCP Servers",
-        "description": "Agent Zero can use external MCP servers, local or remote as tools.",
+        "description": "Agent Zero可以使用外部MCP服务器（本地或远程）作为工具。",
         "fields": mcp_client_fields,
         "tab": "mcp",
     }
@@ -782,7 +792,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "mcp_server_enabled",
             "title": "Enable A0 MCP Server",
-            "description": "Expose Agent Zero as an SSE MCP server. This will make this A0 instance available to MCP clients.",
+            "description": "将Agent Zero公开为SSE MCP服务器。这将使此A0实例可供MCP客户端使用。",
             "type": "switch",
             "value": settings["mcp_server_enabled"],
         }
@@ -792,7 +802,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "mcp_server_token",
             "title": "MCP Server Token",
-            "description": "Token for MCP server authentication.",
+            "description": "用于MCP服务器身份验证的令牌。",
             "type": "text",
             "hidden": True,
             "value": settings["mcp_server_token"],
@@ -802,7 +812,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     mcp_server_section: SettingsSection = {
         "id": "mcp_server",
         "title": "A0 MCP Server",
-        "description": "Agent Zero can be exposed as an SSE MCP server. See <a href=\"javascript:openModal('settings/mcp/server/example.html')\">connection example</a>.",
+        "description": "Agent Zero可以作为SSE MCP服务器公开。请参见<a href=\"javascript:openModal('settings/mcp/server/example.html')\">连接示例</a>。",
         "fields": mcp_server_fields,
         "tab": "mcp",
     }
@@ -814,8 +824,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "backup_create",
             "title": "Create Backup",
-            "description": "Create a backup archive of selected files and configurations "
-            "using customizable patterns.",
+            "description": "使用可自定义的模式创建选定文件和配置的备份存档。",
             "type": "button",
             "value": "Create Backup",
         }
@@ -825,8 +834,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
         {
             "id": "backup_restore",
             "title": "Restore from Backup",
-            "description": "Restore files and configurations from a backup archive "
-            "with pattern-based selection.",
+            "description": "使用基于模式的选择从备份存档中恢复文件和配置。",
             "type": "button",
             "value": "Restore Backup",
         }
@@ -835,8 +843,7 @@ def convert_out(settings: Settings) -> SettingsOutput:
     backup_section: SettingsSection = {
         "id": "backup_restore",
         "title": "Backup & Restore",
-        "description": "Backup and restore Agent Zero data and configurations "
-        "using glob pattern-based file selection.",
+        "description": "使用基于全局模式的文件选择备份和恢复Agent Zero数据和配置。",
         "fields": backup_fields,
         "tab": "backup",
     }
@@ -918,7 +925,7 @@ def normalize_settings(settings: Settings) -> Settings:
     # adjust settings values to match current version if needed
     if "version" not in copy or copy["version"] != default["version"]:
         _adjust_to_version(copy, default)
-        copy["version"] = default["version"] # sync version
+        copy["version"] = default["version"]  # sync version
 
     # remove keys that are not in default
     keys_to_remove = [key for key in copy if key not in default]
@@ -945,8 +952,12 @@ def _adjust_to_version(settings: Settings, default: Settings):
     # starting with 0.9, the default prompt subfolder for agent no. 0 is agent0
     # switch to agent0 if the old default is used from v0.8
     if "version" not in settings or settings["version"].startswith("v0.8"):
-        if "agent_prompts_subdir" not in settings or settings["agent_prompts_subdir"] == "default":
+        if (
+            "agent_prompts_subdir" not in settings
+            or settings["agent_prompts_subdir"] == "default"
+        ):
             settings["agent_prompts_subdir"] = "agent0"
+
 
 def _read_settings_file() -> Settings | None:
     if os.path.exists(SETTINGS_FILE):
